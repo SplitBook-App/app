@@ -17,9 +17,17 @@ Splitbook targets regular, everyday athletes. Ultra-distance and advanced traini
 | Repo | Visibility | Contents |
 |---|---|---|
 | `SplitBook-App/app` | Public | React Native (Expo) app, docs (including this spec), metric formulas |
-| `SplitBook-App/backend` | Private | Webhook receiver, Google Health API client, record calculation, push sending, database access |
+| `SplitBook-App/backend` | Public | Webhook receiver, Google Health API client, record calculation, push sending, database access |
 
-- The Google OAuth client secret, user tokens and all health data live only in `SplitBook-App/backend` and its hosting. Nothing secret is committed to `SplitBook-App/app`.
+- Both repos are public. Security comes from keeping secrets out of git, not from hiding code:
+  - Secrets live in a git-ignored `.env` locally, and in Google Secret Manager or Cloud Run settings once deployed. They are never committed to either repo.
+  - The Google OAuth client secret, user tokens and all health data are handled only by the backend and its hosting, never by the app.
+  - No real health data is committed, including test fixtures.
+  - A committed secret is treated as leaked and rotated immediately.
+  - Every webhook notification is verified as coming from Google, since the endpoint's existence is public.
+- Both repos use the same `main-protection` ruleset: no direct pushes to `main`, PRs need 1 approval from someone other than the last pusher, stale approvals are dismissed, conversations must be resolved, squash-merge only, and no force-pushes or deletion. Repo admins can bypass only by merging a PR.
+- Both repos have secret scanning with push protection and Dependabot alerts enabled.
+- Contributors get Write access to both repos and work on branches.
 - Google Cloud project caveats (see §17 for verification):
   - Refresh tokens expire after about 7 days while the app is in "Testing" mode.
   - Unverified apps with sensitive scopes are capped at about 100 users and show a warning screen.
